@@ -94,12 +94,18 @@ impl<'a> Jail<'a> {
     }
 
     pub fn init(&self, _config: &Config)  -> Result<i32, Box<Error>> {
+        debug!("initializing jail"; "vm" => self.idx.uuid.hyphenated().to_string());
         let mut config = self.jail_root();
         config.push("config");
         fs::create_dir(config.clone())?;
         if ! self.config.resolvers.is_empty() {
+
             let mut resolvers = config.clone();
             resolvers.push("resolvers");
+            debug!("preparing resolver file";
+                   "vm" => self.idx.uuid.hyphenated().to_string(),
+                   "file" => resolvers.to_str(),
+                   "resolvers" => self.config.resolvers.clone().join(" "));
             let mut resolver_file = File::create(resolvers)?;
             for resolver in self.config.resolvers.iter() {
                 resolver_file.write_all(resolver.as_bytes())?;
@@ -111,6 +117,10 @@ impl<'a> Jail<'a> {
             Some(keys) => {
                 let mut keys_path = config.clone();
                 keys_path.push("root_authorized_keys");
+                debug!("preparing root_authorized_keys file";
+                       "vm" => self.idx.uuid.hyphenated().to_string(),
+                       "file" => keys_path.to_str(),
+                       "resolvers" => self.config.resolvers.clone().join(" "));
                 let mut keys_file = File::create(keys_path)?;
                 keys_file.write_all(keys.as_bytes())?;
             }
@@ -120,6 +130,10 @@ impl<'a> Jail<'a> {
             Some(script) => {
                 let mut script_path = config.clone();
                 script_path.push("user_script");
+                debug!("preparing user_script file";
+                       "vm" => self.idx.uuid.hyphenated().to_string(),
+                       "file" => script_path.to_str(),
+                       "resolvers" => self.config.resolvers.clone().join(" "));
                 let mut script_file = File::create(script_path)?;
                 script_file.write_all(script.as_bytes())?;
             }
