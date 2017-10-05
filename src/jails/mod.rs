@@ -122,8 +122,7 @@ impl<'a> Jail<'a> {
                 keys_path.push("root_authorized_keys");
                 debug!("preparing root_authorized_keys file";
                        "vm" => self.idx.uuid.hyphenated().to_string(),
-                       "file" => keys_path.to_str(),
-                       "resolvers" => self.config.resolvers.clone().join(" "));
+                       "file" => keys_path.to_str());
                 let mut keys_file = File::create(keys_path)?;
                 keys_file.write_all(keys.as_bytes())?;
             }
@@ -135,8 +134,7 @@ impl<'a> Jail<'a> {
                 script_path.push("user_script");
                 debug!("preparing user_script file";
                        "vm" => self.idx.uuid.hyphenated().to_string(),
-                       "file" => script_path.to_str(),
-                       "resolvers" => self.config.resolvers.clone().join(" "));
+                       "file" => script_path.to_str());
                 let mut script_file = File::create(script_path)?;
                 script_file.write_all(script.as_bytes())?;
             }
