@@ -10,6 +10,11 @@ use uuid::Uuid;
 use jdb::IdxEntry;
 use jail_config::JailConfig;
 use brand::Brand;
+use std::path::PathBuf;
+use std::fs;
+use std::fs::File;
+use std::io::prelude::*;
+
 
 #[derive(Debug)]
 /// Basic information about a ZFS dataset
@@ -40,6 +45,7 @@ static IFCONFIG: &'static str = "echo";
 
 
 /// Jail config
+#[derive(Debug, Clone)]
 pub struct Jail<'a> {
     /// Index refference
     pub idx: &'a IdxEntry,
@@ -82,6 +88,40 @@ impl<'a> Jail<'a> {
             );
             if !output.status.success() {
                 crit!("failed to destroy interface"; "vm" => self.idx.uuid.hyphenated().to_string());
+            }
+        }
+        Ok(0)
+    }
+
+    pub fn init(&self, _config: &Config)  -> Result<i32, Box<Error>> {
+        let mut config = self.jail_root();
+        config.push("config");
+        fs::create_dir(config.clone())?;
+        if ! self.config.resolvers.is_empty() {
+            let mut resolvers = config.clone();
+            resolvers.push("resolvers");
+            let mut resolver_file = File::create(resolvers)?;
+            for resolver in self.config.resolvers.iter() {
+                resolver_file.write_all(resolver.as_bytes())?;
+                resolver_file.write_all(b"\n")?;
+            }
+        }
+        match self.config.customer_metadata.get("root_authorized_keys") {
+            None => (),
+            Some(keys) => {
+                let mut keys_path = config.clone();
+                keys_path.push("root_authorized_keys");
+                let mut keys_file = File::create(keys_path)?;
+                keys_file.write_all(keys.as_bytes())?;
+            }
+        }
+        match self.config.customer_metadata.get("user-script") {
+            None => (),
+            Some(script) => {
+                let mut script_path = config.clone();
+                script_path.push("user_script");
+                let mut script_file = File::create(script_path)?;
+                script_file.write_all(script.as_bytes())?;
             }
         }
         Ok(0)
@@ -163,17 +203,18 @@ impl<'a> Jail<'a> {
         Ok(0)
     }
 
+    fn jail_root(&self) -> PathBuf {
+        let mut root = PathBuf::from(self.idx.root.clone());
+        root.push("root");
+        root
+    }
+
     fn create_args(&self, config: &Config) -> Result<CreateArgs, Box<Error>> {
-
         let brand = self.brand(config)?;
-
-
         let uuid = self.idx.uuid.hyphenated().to_string();
         let mut name = String::from("name=");
         name.push_str(uuid.as_str());
-        let mut path = String::from("path=/");
-        path.push_str(self.idx.root.as_str());
-        path.push_str("/root");
+        let path = String::from(self.jail_root().to_string_lossy());
         let mut hostuuid = String::from("host.hostuuid=");
         hostuuid.push_str(uuid.as_str());
         let mut hostname = String::from("host.hostname=");

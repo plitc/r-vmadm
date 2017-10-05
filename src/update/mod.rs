@@ -4,6 +4,7 @@ use std::error::Error;
 use std::io::Read;
 use serde_json;
 use uuid::Uuid;
+use std::collections::BTreeMap as Map;
 
 
 macro_rules! update {
@@ -292,6 +293,9 @@ mod tests {
             owner_uuid: None,
             package_name: None,
             package_version: None,
+            resolvers: Vec::new(),
+            customer_metadata: Map::new(),
+            internal_metadata: Map::new(),
         }
     }
 
