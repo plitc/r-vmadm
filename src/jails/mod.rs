@@ -230,7 +230,9 @@ impl<'a> Jail<'a> {
         let uuid = self.idx.uuid.hyphenated().to_string();
         let mut name = String::from("name=");
         name.push_str(uuid.as_str());
-        let path = String::from(self.jail_root().to_string_lossy());
+        let mut path = String::from("path=/");
+        path.push_str(self.idx.root.as_str());
+        path.push_str("/root");
         let mut hostuuid = String::from("host.hostuuid=");
         hostuuid.push_str(uuid.as_str());
         let mut hostname = String::from("host.hostname=");
