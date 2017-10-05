@@ -519,11 +519,11 @@ fn create(conf: &Config, matches: &clap::ArgMatches) -> Result<i32, Box<Error>> 
          };
         match jail.init(state1.conf) {
             Ok(_) => Ok(state1),
-            Err(_) => Err(Failure::new(state1, GenericError::bx("failed to init jail")))
+            Err(err) => Err(Failure::new(state1, err))
         }
     }
     fn init_down(state: CreateState) -> CreateState {
-        crit!("Rolling back clone");
+        crit!("Rolling back init");
         state
     }
     fn brand_install_up(state: CreateState) -> Result<CreateState, Failure<CreateState>> {

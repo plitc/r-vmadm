@@ -82,7 +82,9 @@ impl<'a> Jail<'a> {
             let mut target_name = jprefix.clone();
             target_name.push_str(iface.iface.as_str());
             let args = vec![epair, String::from("name"), target_name];
-            debug!("destroying epair"; "vm" => self.idx.uuid.hyphenated().to_string(), "args" => args.clone().join(" "));
+            debug!("destroying epair";
+                   "vm" => self.idx.uuid.hyphenated().to_string(),
+                   "args" => args.clone().join(" "));
             let output = Command::new(IFCONFIG).args(args.clone()).output().expect(
                 "ifconfig failed",
             );
@@ -94,12 +96,13 @@ impl<'a> Jail<'a> {
     }
 
     pub fn init(&self, _config: &Config)  -> Result<i32, Box<Error>> {
-        debug!("initializing jail"; "vm" => self.idx.uuid.hyphenated().to_string());
         let mut config = self.jail_root();
         config.push("config");
+        debug!("initializing jail";
+               "dir" => config.to_str(),
+               "vm" => self.idx.uuid.hyphenated().to_string());
         fs::create_dir(config.clone())?;
         if ! self.config.resolvers.is_empty() {
-
             let mut resolvers = config.clone();
             resolvers.push("resolvers");
             debug!("preparing resolver file";
