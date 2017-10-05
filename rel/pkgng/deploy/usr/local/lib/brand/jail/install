@@ -13,10 +13,10 @@ validate_root "${jail_root}"
 ## jail, the rest will be populated by us
 find ${jail_root}/root \
      -not -path "${jail_root}/root/config" \
-     -not -path "${jail_root}/root/config\*" \
+     -not -path "${jail_root}/root/config/*" \
      -not -path "${jail_root}/root/jail" \
      -not -path "${jail_root}/root/jail/*" \
-     -not -path "${jail_root}/root"\
+     -not -path "${jail_root}/root" \
      -delete
 
 # create bas
