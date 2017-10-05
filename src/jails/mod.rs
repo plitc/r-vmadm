@@ -221,7 +221,8 @@ impl<'a> Jail<'a> {
     }
 
     fn jail_root(&self) -> PathBuf {
-        let mut root = PathBuf::from(self.idx.root.clone());
+        let mut root = PathBuf::from("/");
+        root.push(self.idx.root.clone());
         root.push("root");
         root
     }
